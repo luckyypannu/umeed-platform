@@ -1,0 +1,4 @@
+# Frontend and Express backend workspace packages.
+packages:
+  - '.'
+  - 'server'
