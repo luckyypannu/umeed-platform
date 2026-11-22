@@ -48,6 +48,7 @@ export const metadata: Metadata = {
 }
 
 import { AuthProvider } from '../lib/auth-context'
+export const dynamic = 'force-dynamic'
 
 export const viewport: Viewport = {
   colorScheme: 'light',
