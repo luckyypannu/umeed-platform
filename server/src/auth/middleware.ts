@@ -145,16 +145,29 @@ export function createLoginRateLimiter(config: ServerConfig) {
     standardHeaders: 'draft-8',
     legacyHeaders: false,
     keyGenerator(request) {
+      const ip = request.ip ? ipKeyGenerator(request.ip) : 'unknown'
       if (typeof request.body?.email === 'string') {
         const email = request.body.email.trim().toLowerCase()
-        return `email:${createHmac('sha256', config.SESSION_SECRET).update(email).digest('hex')}`
+        const emailHash = createHmac('sha256', config.SESSION_SECRET).update(email).digest('hex')
+        return `email:${emailHash}:ip:${ip}`
       }
-      const ip = request.ip
-      return ip ? `ip:${ipKeyGenerator(ip)}` : 'ip:unknown'
+      return `ip:${ip}`
     },
     message: { error: 'Too many login attempts. Please try again later.' },
   })
 }
+
+export const createLoginIpRateLimiter = () =>
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 30,
+    standardHeaders: 'draft-8',
+    legacyHeaders: false,
+    keyGenerator(request) {
+      return request.ip ? `ip:${ipKeyGenerator(request.ip)}` : 'ip:unknown'
+    },
+    message: { error: 'Too many login attempts. Please try again later.' },
+  })
 
 export const createRegistrationRateLimiter = () =>
   rateLimit({

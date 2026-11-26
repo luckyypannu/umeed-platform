@@ -283,11 +283,37 @@ test('public impact endpoint reports aggregates from MongoDB', async () => {
     seekerName: 'Fictional seeker',
     status: 'resolved',
   })
+  await SupportRequest.collection.insertMany([
+    {
+      title: 'Fictional Delhi request',
+      category: 'Food Support',
+      description: 'Fictional aggregate fixture.',
+      city: 'Delhi',
+      seekerId: new mongoose.Types.ObjectId(userIds.seeker),
+      seekerName: 'Fictional seeker',
+      status: 'submitted',
+    },
+    {
+      title: 'Fictional lowercase Delhi request',
+      category: 'Education',
+      description: 'Fictional aggregate fixture.',
+      city: 'delhi ',
+      seekerId: new mongoose.Types.ObjectId(userIds.seeker),
+      seekerName: 'Fictional seeker',
+      status: 'in_progress',
+    },
+  ])
   const response = await request(app).get('/api/v1/impact')
   assert.equal(response.status, 200)
-  assert.equal(response.body.stats.totalRequests, 1)
+  assert.equal(response.body.stats.totalRequests, 3)
   assert.equal(response.body.stats.resolvedRequests, 1)
-  assert.equal(response.body.stats.categoryBreakdown['Food Support'], 1)
+  assert.equal(response.body.stats.categoryBreakdown['Food Support'], 2)
+  assert.equal(response.body.stats.categoryBreakdown.Education, 1)
+  assert.equal(response.body.stats.statusBreakdown.resolved, 1)
+  assert.equal(response.body.stats.statusBreakdown.submitted, 1)
+  assert.equal(response.body.stats.citiesCovered, 2)
+  assert.equal(response.headers['cache-control'], 'no-store')
+  assert.deepEqual(Object.keys(response.body), ['success', 'stats'])
   assert.equal(JSON.stringify(response.body).includes('Fictional seeker'), false)
 })
 

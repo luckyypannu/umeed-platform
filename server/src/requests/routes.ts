@@ -56,7 +56,7 @@ const updateBodySchema = z.object({
   issueType: z.string().trim().min(1).max(120).optional(),
   issueDetails: z.string().trim().min(1).max(2000).optional(),
   resolutionNotes: z.string().trim().min(1).max(2000).optional(),
-  rating: z.number().min(1).max(5).optional(),
+  rating: z.number().int().min(1).max(5).optional(),
 }).strict().refine(
   (update) => Object.values(update).some((value) => value !== undefined),
   'At least one request field is required',
