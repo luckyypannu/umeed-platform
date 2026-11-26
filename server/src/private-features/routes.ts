@@ -55,22 +55,6 @@ function credentialHash(token: string, config: ServerConfig): string {
   return hashSessionToken(token, config.SESSION_SECRET)
 }
 
-async function writeAudit(
-  request: Request,
-  action: string,
-  targetId: string,
-): Promise<void> {
-  const actor = request.auth?.user
-  await AuditEvent.create({
-    actorId: actor ? new Types.ObjectId(actor.id) : null,
-    actorRole: actor?.role ?? 'anonymous',
-    action,
-    targetType: 'emergency',
-    targetId,
-    outcome: 'succeeded',
-  })
-}
-
 const emergencyInput = z.object({
   latitude: z.number().finite().min(-90).max(90),
   longitude: z.number().finite().min(-180).max(180),
@@ -167,16 +151,16 @@ function chatReply(text: string): string {
   if (query.includes('emergency') || query.includes('danger') || query.includes('112')) {
     return 'For immediate danger, contact local emergency services directly. UMEED does not dispatch emergency services.'
   }
-  if (query.includes('request') || query.includes('help') || query.includes('madad')) {
-    return 'You can submit a support request from the Get Help page and view your requests in your dashboard.'
-  }
   if (query.includes('volunteer') || query.includes('join')) {
     return 'You can create a volunteer account from the Volunteer registration page. Verified volunteer profiles may appear in the public directory.'
   }
   if (query.includes('ngo') || query.includes('organization')) {
     return 'Organizations can register through the NGO portal. Verification is required before accessing eligible support requests.'
   }
-  if (query.includes('hello') || query.includes('hi') || query.includes('namaste')) {
+  if (query.includes('request') || query.includes('help') || query.includes('madad')) {
+    return 'You can submit a support request from the Get Help page and view your requests in your dashboard.'
+  }
+  if (/\b(hi|hello|namaste)\b/.test(query)) {
     return 'Hello. I can help explain how to use UMEED support features.'
   }
   return 'I can provide basic guidance about UMEED requests, volunteers, NGOs, and emergency information. This is a rule-based assistant, not a human or AI-powered service.'
@@ -267,10 +251,25 @@ export function createPrivateFeatureRouter(config: ServerConfig) {
     }
     const records = await EmergencyRecord.find(scope.filter).sort({ createdAt: -1 }).limit(50)
     if (request.auth?.user.role === 'admin') {
-      await writeAudit(request, 'emergency.records.listed', 'collection')
+      await AuditEvent.create({
+        actorId: new Types.ObjectId(request.auth.user.id),
+        actorRole: 'admin',
+        action: 'emergency.records.listed',
+        targetType: 'emergency',
+        targetId: 'collection',
+        outcome: 'succeeded',
+      })
     }
-    for (const record of records) {
-      await writeAudit(request, 'emergency.record.accessed', record._id.toString())
+    if (records.length > 0) {
+      const actor = request.auth?.user
+      await AuditEvent.insertMany(records.map((record) => ({
+        actorId: actor ? new Types.ObjectId(actor.id) : null,
+        actorRole: actor?.role ?? 'anonymous',
+        action: 'emergency.record.accessed',
+        targetType: 'emergency',
+        targetId: record._id.toString(),
+        outcome: 'succeeded',
+      })))
     }
     const user = request.auth?.user
     const serialized = records.map((record) => {

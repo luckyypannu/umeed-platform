@@ -33,6 +33,7 @@ before(async () => {
     SESSION_SECRET: sessionSecret,
     JWT_SECRET: jwtSecret,
     FRONTEND_ORIGIN: frontendOrigin,
+    TRUST_PROXY: 1,
     LOG_LEVEL: 'silent',
   })
   await connectDatabase(config)
@@ -240,6 +241,88 @@ test('login creates an HttpOnly database session; invalid role and bearer-only a
   assert.equal((await agent.get('/api/v1/auth/me')).status, 401)
   const revokedSession = await Session.findById(storedSession._id).lean()
   assert.ok(revokedSession?.revokedAt)
+})
+
+test('login attempts from one IP do not lock the account for another IP', async () => {
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    const failedLogin = await request(app)
+      .post('/api/v1/auth/login')
+      .set('Origin', frontendOrigin)
+      .set('X-Forwarded-For', '203.0.113.10')
+      .send({
+        email: 'fictional.seeker@example.test',
+        password: 'incorrect-password',
+      })
+    assert.equal(failedLogin.status, 401)
+  }
+
+  const attackIpLocked = await request(app)
+    .post('/api/v1/auth/login')
+    .set('Origin', frontendOrigin)
+    .set('X-Forwarded-For', '203.0.113.10')
+    .send({
+      email: 'fictional.seeker@example.test',
+      password: 'incorrect-password',
+    })
+  assert.equal(attackIpLocked.status, 429)
+
+  const victimLogin = await request(app)
+    .post('/api/v1/auth/login')
+    .set('Origin', frontendOrigin)
+    .set('X-Forwarded-For', '203.0.113.11')
+    .send({
+      email: 'fictional.seeker@example.test',
+      password: 'fixture-password-123',
+    })
+  assert.equal(victimLogin.status, 200)
+})
+
+test('verified NGO organization details require admin assistance but other profile fields remain editable', async () => {
+  const { hash, salt } = await hashPassword('fictional-ngo-password-123')
+  await User.create({
+    email: 'verified.ngo@example.test',
+    passwordHash: hash,
+    salt,
+    role: 'ngo',
+    status: 'verified',
+    name: 'Fictional Verified NGO',
+    orgName: 'Fictional Verified NGO',
+    contactPerson: 'Fictional Contact',
+    address: 'Fictional NGO address',
+    operatingCity: 'Fictional City',
+    phone: '0000000000',
+    city: 'Fictional City',
+    locality: '',
+  })
+
+  const agent = request.agent(app)
+  const login = await agent
+    .post('/api/v1/auth/login')
+    .set('Origin', frontendOrigin)
+    .send({
+      email: 'verified.ngo@example.test',
+      password: 'fictional-ngo-password-123',
+    })
+  assert.equal(login.status, 200)
+  const csrfToken = login.body.csrfToken as string
+
+  for (const field of ['orgName', 'contactPerson', 'address', 'operatingCity']) {
+    const response = await agent
+      .put('/api/v1/auth/me')
+      .set('Origin', frontendOrigin)
+      .set('X-CSRF-Token', csrfToken)
+      .send({ [field]: 'Fictional changed detail' })
+    assert.equal(response.status, 403)
+    assert.equal(response.body.error, 'Contact an admin to change verified organization details')
+  }
+
+  const editable = await agent
+    .put('/api/v1/auth/me')
+    .set('Origin', frontendOrigin)
+    .set('X-CSRF-Token', csrfToken)
+    .send({ phone: '0000000001' })
+  assert.equal(editable.status, 200)
+  assert.equal(editable.body.user.phone, '0000000001')
 })
 
 test('expired sessions cannot authenticate even before TTL cleanup', async () => {
