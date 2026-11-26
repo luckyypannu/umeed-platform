@@ -1,21 +1,11 @@
-'use client'
+import type { Metadata } from 'next'
+import RegisterClient from './register-client'
 
-import { useRouter } from 'next/navigation'
-import { RoleSelectionPage } from '../../components/PublicShell'
-import LanguageSelector from '../../components/LanguageSelector'
-import { useTranslation } from '../../lib/useTranslation'
+export const metadata: Metadata = {
+  title: 'Create an account',
+  description: 'Choose a UMEED account type to request support, volunteer, or register an organization.',
+}
 
 export default function RegisterPage() {
-  const router = useRouter()
-  const { lang, setLang } = useTranslation()
-  return (
-    <main>
-      <LanguageSelector value={lang} onChange={setLang} />
-      <RoleSelectionPage
-        navigate={(route) =>
-          router.push(`/register/${route.replace('register-', '')}`)
-        }
-      />
-    </main>
-  )
+  return <RegisterClient />
 }

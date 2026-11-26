@@ -41,7 +41,7 @@ import {
   getRelativeTime,
   maskContactDetail,
 } from '../../lib/dashboard-helpers'
-import { categories } from '../CategoryGrid'
+import { categories } from '../../lib/categories'
 
 export default function NgoDashboard({
   user,
@@ -104,7 +104,7 @@ export default function NgoDashboard({
   // Opportunity creation form
   const [creatingOp, setCreatingOp] = useState(false)
   const [opTitle, setOpTitle] = useState('')
-  const [opCategory, setOpCategory] = useState(categories[0] || 'Food Support')
+  const [opCategory, setOpCategory] = useState<string>(categories[0].label)
   const [opMode, setOpMode] = useState<'In-person' | 'Remote'>('In-person')
   const [opCity, setOpCity] = useState(user.operatingCity || user.city || '')
   const [opDescription, setOpDescription] = useState('')
@@ -821,9 +821,9 @@ export default function NgoDashboard({
                     onChange={(e) => setOpCategory(e.target.value)}
                     className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200"
                   >
-                    {categories.map((c) => (
-                      <option key={c} value={c}>
-                        {c}
+                    {categories.map((category) => (
+                      <option key={category.id} value={category.label}>
+                        {category.label}
                       </option>
                     ))}
                   </select>
@@ -1026,7 +1026,7 @@ export default function NgoDashboard({
                 type="text"
                 value={areasOfSupport}
                 onChange={(e) => setAreasOfSupport(e.target.value)}
-                placeholder="Food Support, Healthcare, Education, Shelter"
+                placeholder={categories.slice(0, 3).map((category) => category.label).join(', ')}
                 className="w-full text-xs sm:text-sm px-3.5 py-2.5 rounded-xl border border-slate-200"
               />
               <span className="text-[11px] text-slate-400">Separate multiple categories with commas</span>

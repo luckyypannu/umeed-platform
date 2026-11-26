@@ -31,7 +31,6 @@ const additionalFrontendOrigins = 'http://127.0.0.1:3100'
 const apiPort = 4100
 const mongoPort = 27117
 const sessionSecret = randomBytes(32).toString('hex')
-const jwtSecret = randomBytes(32).toString('hex')
 const fixtureUsers = [
   { email: 'admin@phase71.example.test', role: 'admin', status: 'active', name: 'Fictional UMEED Admin' },
   { email: 'seeker@phase71.example.test', role: 'seeker', status: 'active', name: 'Fictional Aditi Sharma' },
@@ -51,7 +50,6 @@ async function seedFictionalStagingData(mongoUri: string): Promise<void> {
     MONGODB_URI: mongoUri,
     MONGODB_DB_NAME: dbName,
     SESSION_SECRET: sessionSecret,
-    JWT_SECRET: jwtSecret,
     FRONTEND_ORIGIN: frontendOrigin,
     LOCAL_STAGING_ORIGINS: additionalFrontendOrigins,
     PORT: String(apiPort),
@@ -258,7 +256,6 @@ async function main(): Promise<void> {
     MONGODB_URI: mongoUri,
     MONGODB_DB_NAME: dbName,
     SESSION_SECRET: sessionSecret,
-    JWT_SECRET: jwtSecret,
     FRONTEND_ORIGIN: frontendOrigin,
     LOCAL_STAGING_ORIGINS: additionalFrontendOrigins,
     PORT: String(apiPort),

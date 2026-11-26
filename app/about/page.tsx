@@ -1,12 +1,11 @@
-'use client'
+import type { Metadata } from 'next'
+import AboutClient from './about-client'
 
-import { useRouter } from 'next/navigation'
-import { InfoPage } from '../../components/PublicShell'
-import { routePath } from '../../lib/routes'
+export const metadata: Metadata = {
+  title: 'About UMEED',
+  description: 'Learn how UMEED connects people seeking support with community organizations and volunteers.',
+}
 
 export default function AboutPage() {
-  const router = useRouter()
-  return (
-    <InfoPage navigate={(route) => router.push(routePath(route))} page="about" />
-  )
+  return <AboutClient />
 }

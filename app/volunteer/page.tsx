@@ -1,17 +1,11 @@
-'use client'
+import type { Metadata } from 'next'
+import VolunteerClient from './volunteer-client'
 
-import { useRouter } from 'next/navigation'
-import PublicShell from '../../components/PublicShell'
-import VolunteerApplicationPage from '../../components/VolunteerApplicationPage'
-import { routePath } from '../../lib/routes'
+export const metadata: Metadata = {
+  title: 'Volunteer with UMEED',
+  description: 'Update your volunteer profile, skills, availability, and preferred support categories.',
+}
 
 export default function VolunteerPage() {
-  const router = useRouter()
-  return (
-    <PublicShell navigate={(route) => router.push(routePath(route))}>
-      <main className="info-page">
-        <VolunteerApplicationPage />
-      </main>
-    </PublicShell>
-  )
+  return <VolunteerClient />
 }

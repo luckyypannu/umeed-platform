@@ -5,11 +5,8 @@ import {
   scryptSync,
   timingSafeEqual,
 } from 'node:crypto'
-import type { UserRole } from '../models/user.js'
-
 const HASH_BYTES = 64
 const SESSION_TTL_MS = 8 * 60 * 60 * 1000
-const ACCESS_TOKEN_TTL_SECONDS = 10 * 60
 const DUMMY_SALT = randomBytes(16).toString('hex')
 const DUMMY_HASH = scryptSync(randomBytes(32), DUMMY_SALT, HASH_BYTES).toString('hex')
 
@@ -70,25 +67,6 @@ export function verifyCsrfToken(
   const expected = Buffer.from(createCsrfToken(sessionToken, secret), 'base64url')
   const submitted = Buffer.from(submittedToken, 'base64url')
   return submitted.length === expected.length && timingSafeEqual(submitted, expected)
-}
-
-export function createCompatibilityToken(
-  user: { id: string; email: string; role: UserRole },
-  secret: string,
-  now = new Date(),
-): string {
-  const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url')
-  const payload = Buffer.from(
-    JSON.stringify({
-      userId: user.id,
-      email: user.email,
-      role: user.role,
-      exp: Math.floor(now.getTime() / 1000) + ACCESS_TOKEN_TTL_SECONDS,
-    }),
-  ).toString('base64url')
-  const content = `${header}.${payload}`
-  const signature = createHmac('sha256', secret).update(content).digest('base64url')
-  return `${content}.${signature}`
 }
 
 export function sessionExpiresAt(now = new Date()): Date {

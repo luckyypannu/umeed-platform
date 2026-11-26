@@ -4,7 +4,6 @@ import type { ServerConfig } from '../config/env.js'
 import { Session } from '../models/session.js'
 import { User, type UserDocument, type UserRole, type UserStatus } from '../models/user.js'
 import {
-  createCompatibilityToken,
   createCsrfToken,
   createSessionToken,
   hashPassword,
@@ -129,13 +128,6 @@ function publicUser(user: UserDocument) {
     createdAt: user.createdAt.toISOString(),
     updatedAt: user.updatedAt.toISOString(),
   }
-}
-
-function compatibilityToken(user: UserDocument, config: ServerConfig): string {
-  return createCompatibilityToken(
-    { id: user._id.toString(), email: user.email, role: user.role },
-    config.JWT_SECRET,
-  )
 }
 
 export function createAuthRouter(config: ServerConfig) {
@@ -269,7 +261,6 @@ export function createAuthRouter(config: ServerConfig) {
         success: true,
         user: publicUser(user),
         csrfToken: createCsrfToken(sessionToken, config.SESSION_SECRET),
-        compatibilityToken: compatibilityToken(user, config),
       })
     },
   )
@@ -296,7 +287,6 @@ export function createAuthRouter(config: ServerConfig) {
       success: true,
       user: publicUser(document),
       csrfToken: createCsrfToken(request.auth!.sessionToken, config.SESSION_SECRET),
-      compatibilityToken: compatibilityToken(document, config),
     })
   })
 
@@ -337,7 +327,6 @@ export function createAuthRouter(config: ServerConfig) {
       success: true,
       user: publicUser(user),
       csrfToken: createCsrfToken(request.auth!.sessionToken, config.SESSION_SECRET),
-      compatibilityToken: compatibilityToken(user, config),
     })
   })
 

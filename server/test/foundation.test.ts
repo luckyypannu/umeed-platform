@@ -11,7 +11,6 @@ function testConfig(overrides: NodeJS.ProcessEnv = {}) {
     MONGODB_URI: 'mongodb://127.0.0.1:27017',
     MONGODB_DB_NAME: 'umeed_test',
     SESSION_SECRET: 'test-session-secret-with-more-than-32-bytes',
-    JWT_SECRET: 'test-jwt-secret-with-more-than-32-bytes',
     FRONTEND_ORIGIN: 'http://localhost:3000',
     TRUST_PROXY: '0',
     LOG_LEVEL: 'silent',
@@ -20,20 +19,10 @@ function testConfig(overrides: NodeJS.ProcessEnv = {}) {
   })
 }
 
-test('environment validation rejects missing or weak secrets and invalid MongoDB URIs', () => {
+test('environment validation rejects missing session secrets and invalid MongoDB URIs', () => {
   assert.throws(
     () => parseEnvironment({ MONGODB_URI: 'mongodb://localhost:27017', MONGODB_DB_NAME: 'umeed', SESSION_SECRET: 'short', FRONTEND_ORIGIN: 'http://localhost:3000' }),
     /SESSION_SECRET/,
-  )
-  assert.throws(
-    () => parseEnvironment({
-      MONGODB_URI: 'mongodb://localhost:27017',
-      MONGODB_DB_NAME: 'umeed',
-      SESSION_SECRET: 'test-session-secret-with-more-than-32-bytes',
-      JWT_SECRET: 'short',
-      FRONTEND_ORIGIN: 'http://localhost:3000',
-    }),
-    /JWT_SECRET/,
   )
   assert.throws(
     () => parseEnvironment({ MONGODB_URI: 'http://localhost:27017', MONGODB_DB_NAME: 'umeed', SESSION_SECRET: 'test-session-secret-with-more-than-32-bytes', FRONTEND_ORIGIN: 'http://localhost:3000' }),
@@ -49,7 +38,6 @@ test('environment validation rejects missing or weak secrets and invalid MongoDB
       MONGODB_URI: 'mongodb://localhost:27017',
       MONGODB_DB_NAME: 'umeed',
       SESSION_SECRET: 'test-session-secret-with-more-than-32-bytes',
-      JWT_SECRET: 'test-jwt-secret-with-more-than-32-bytes',
       FRONTEND_ORIGIN: 'http://umeed.example',
     }),
     /HTTPS in production/,
@@ -60,7 +48,6 @@ test('environment validation rejects missing or weak secrets and invalid MongoDB
       MONGODB_URI: 'mongodb://mongo.example:27017/umeed',
       MONGODB_DB_NAME: 'umeed',
       SESSION_SECRET: 'test-session-secret-with-more-than-32-bytes',
-      JWT_SECRET: 'test-jwt-secret-with-more-than-32-bytes',
       FRONTEND_ORIGIN: 'https://umeed.example',
     }),
     /MONGODB_URI must enable TLS/,
@@ -71,7 +58,6 @@ test('environment validation rejects missing or weak secrets and invalid MongoDB
       MONGODB_URI: 'mongodb+srv://mongo.example/umeed?tls=false',
       MONGODB_DB_NAME: 'umeed',
       SESSION_SECRET: 'test-session-secret-with-more-than-32-bytes',
-      JWT_SECRET: 'test-jwt-secret-with-more-than-32-bytes',
       FRONTEND_ORIGIN: 'https://umeed.example',
     }),
     /MONGODB_URI must enable TLS/,
@@ -81,7 +67,6 @@ test('environment validation rejects missing or weak secrets and invalid MongoDB
     MONGODB_URI: 'mongodb://mongo.example:27017/umeed?tls=true',
     MONGODB_DB_NAME: 'umeed',
     SESSION_SECRET: 'test-session-secret-with-more-than-32-bytes',
-    JWT_SECRET: 'test-jwt-secret-with-more-than-32-bytes',
     FRONTEND_ORIGIN: 'https://umeed.example',
   }))
   assert.doesNotThrow(() => parseEnvironment({
@@ -89,7 +74,6 @@ test('environment validation rejects missing or weak secrets and invalid MongoDB
     MONGODB_URI: 'mongodb+srv://mongo.example/umeed',
     MONGODB_DB_NAME: 'umeed',
     SESSION_SECRET: 'test-session-secret-with-more-than-32-bytes',
-    JWT_SECRET: 'test-jwt-secret-with-more-than-32-bytes',
     FRONTEND_ORIGIN: 'https://umeed.example',
   }))
   assert.throws(
@@ -98,7 +82,6 @@ test('environment validation rejects missing or weak secrets and invalid MongoDB
       MONGODB_URI: 'mongodb+srv://mongo.example/umeed',
       MONGODB_DB_NAME: 'umeed',
       SESSION_SECRET: 'test-session-secret-with-more-than-32-bytes',
-      JWT_SECRET: 'test-jwt-secret-with-more-than-32-bytes',
       FRONTEND_ORIGIN: 'https://umeed.example',
       LOCAL_STAGING_ORIGINS: 'http://localhost:3100',
     }),
@@ -110,7 +93,6 @@ test('environment validation rejects missing or weak secrets and invalid MongoDB
       MONGODB_URI: 'mongodb://localhost:27017',
       MONGODB_DB_NAME: 'umeed',
       SESSION_SECRET: 'test-session-secret-with-more-than-32-bytes',
-      JWT_SECRET: 'test-jwt-secret-with-more-than-32-bytes',
       FRONTEND_ORIGIN: 'http://localhost:3100',
       LOCAL_STAGING_ORIGINS: 'https://attacker.example',
     }),

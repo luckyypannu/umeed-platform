@@ -23,7 +23,6 @@ import { createApp } from '../src/app.js'
 
 const frontendOrigin = 'http://localhost:3000'
 const sessionSecret = 'phase-six-migration-test-secret-with-at-least-32-bytes'
-const jwtSecret = 'phase-six-jwt-test-secret-with-at-least-32-bytes'
 const legacyPassword = 'fictional-migration-password'
 const fixedDate = '2025-02-03T04:05:06.000Z'
 const compatibleSeekerId = '65f000000000000000000001'
@@ -166,7 +165,6 @@ before(async () => {
     MONGODB_URI: mongo.getUri(),
     MONGODB_DB_NAME: 'umeed_migration_test',
     SESSION_SECRET: sessionSecret,
-    JWT_SECRET: jwtSecret,
     FRONTEND_ORIGIN: frontendOrigin,
     LOG_LEVEL: 'silent',
   })

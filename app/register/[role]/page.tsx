@@ -1,23 +1,25 @@
-'use client'
+import type { Metadata } from 'next'
+import RegisterRoleClient from './register-role-client'
 
-import { useParams, useRouter } from 'next/navigation'
-import type { Role } from '../../../lib/types'
-import RegistrationForm from '../../../components/RegistrationForm'
-import LanguageSelector from '../../../components/LanguageSelector'
-import { useTranslation } from '../../../lib/useTranslation'
+const roleTitles: Record<string, string> = {
+  seeker: 'Seeker',
+  ngo: 'NGO',
+  volunteer: 'Volunteer',
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ role: string }>
+}): Promise<Metadata> {
+  const { role } = await params
+  const roleTitle = roleTitles[role] ?? 'Account'
+  return {
+    title: `${roleTitle} registration`,
+    description: `Create a UMEED ${roleTitle.toLowerCase()} account.`,
+  }
+}
 
 export default function RegisterRolePage() {
-  const params = useParams<{ role: string }>()
-  const router = useRouter()
-  const role = params.role as Role
-  const { lang, setLang } = useTranslation()
-  return (
-    <main className="auth-page">
-      <LanguageSelector value={lang} onChange={setLang} />
-      <RegistrationForm
-        role={role}
-        navigate={(route) => router.push(route === 'login' ? '/login' : '/register')}
-      />
-    </main>
-  )
+  return <RegisterRoleClient />
 }

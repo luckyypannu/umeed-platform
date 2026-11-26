@@ -25,9 +25,11 @@ const notoGurmukhi = Noto_Sans_Gurmukhi({
 })
 
 export const metadata: Metadata = {
-  title: 'UMEED — Together, We Can Make a Difference',
+  title: {
+    default: 'Together, We Can Make a Difference',
+    template: '%s — UMEED',
+  },
   description: 'UMEED connects people seeking support with community organizations and volunteers who can help.',
-  generator: 'v0.app',
   icons: {
     icon: [
       {

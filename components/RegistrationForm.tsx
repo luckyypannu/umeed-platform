@@ -4,8 +4,8 @@ import { useState } from 'react'
 import { ArrowRight, Check, Loader2 } from 'lucide-react'
 import { useTranslation } from '../lib/useTranslation'
 import type { Role } from '../lib/types'
+import { categories } from '../lib/categories'
 import FormMessage from './ui/FormMessage'
-import { categories, categoryKeys } from './CategoryGrid'
 import { api } from '../lib/api'
 
 const roleNames: Record<Role, string> = {
@@ -198,7 +198,7 @@ export default function RegistrationForm({
               </label>
               <label htmlFor="reg-interests">
                 {t('form.interests')}
-                <input id="reg-interests" name="interests" placeholder="e.g. Education, Elderly care" />
+                <input id="reg-interests" name="interests" placeholder="e.g. Community learning, elder companionship" />
               </label>
               <label htmlFor="reg-availability">
                 {t('form.availability')}
@@ -214,14 +214,14 @@ export default function RegistrationForm({
           <legend>{t('form.categories')}</legend>
           <div className="check-grid">
             {categories.map((category) => (
-              <label htmlFor={`reg-category-${category}`} key={category}>
+              <label htmlFor={`reg-category-${category.id}`} key={category.id}>
                 <input
-                  id={`reg-category-${category}`}
+                  id={`reg-category-${category.id}`}
                   type="checkbox"
-                  checked={selectedCategories.includes(category)}
-                  onChange={() => toggleCategory(category)}
+                  checked={selectedCategories.includes(category.label)}
+                  onChange={() => toggleCategory(category.label)}
                 />
-                {t(categoryKeys[category])}
+                {t(category.i18nKey)}
               </label>
             ))}
           </div>

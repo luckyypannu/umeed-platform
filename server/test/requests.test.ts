@@ -19,7 +19,6 @@ import { createApp } from '../src/app.js'
 
 const frontendOrigin = 'http://localhost:3000'
 const sessionSecret = 'phase-four-request-test-secret-with-at-least-32-bytes'
-const jwtSecret = 'phase-four-jwt-test-secret-with-at-least-32-bytes'
 
 let mongo: MongoMemoryReplSet
 let app: ReturnType<typeof createApp>
@@ -104,7 +103,6 @@ before(async () => {
     MONGODB_URI: mongo.getUri(),
     MONGODB_DB_NAME: 'umeed_requests_test',
     SESSION_SECRET: sessionSecret,
-    JWT_SECRET: jwtSecret,
     FRONTEND_ORIGIN: frontendOrigin,
     LOG_LEVEL: 'silent',
   })

@@ -1,15 +1,11 @@
-'use client'
+import type { Metadata } from 'next'
+import ChatClient from './chat-client'
 
-import { useRouter } from 'next/navigation'
-import PublicShell from '../../components/PublicShell'
-import ChatPage from '../../components/ChatPage'
-import { routePath } from '../../lib/routes'
+export const metadata: Metadata = {
+  title: 'Community Chat',
+  description: 'Get basic guidance on UMEED requests, volunteering, organizations, and emergency information.',
+}
 
 export default function ChatRoute() {
-  const router = useRouter()
-  return (
-    <PublicShell navigate={(route) => router.push(routePath(route))}>
-      <ChatPage onClose={() => router.push('/')} />
-    </PublicShell>
-  )
+  return <ChatClient />
 }

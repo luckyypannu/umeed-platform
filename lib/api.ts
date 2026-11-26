@@ -14,7 +14,6 @@ import {
   ChatMessage,
 } from './types'
 
-let compatibilityToken: string | null = null
 let csrfToken: string | null = null
 
 export const api = {
@@ -22,14 +21,6 @@ export const api = {
     if (typeof window === 'undefined') return
     localStorage.removeItem('umeed_auth_token')
     localStorage.removeItem('umeed_auth_user')
-  },
-
-  getToken(): string | null {
-    return compatibilityToken
-  },
-
-  setToken(token: string | null) {
-    compatibilityToken = token
   },
 
   setCsrfToken(token: string | null) {
@@ -40,13 +31,11 @@ export const api = {
     endpoint: string,
     options: RequestInit = {},
   ): Promise<T> {
-    const token = api.getToken()
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       ...(options.headers as Record<string, string>),
     }
 
-    if (token) headers.Authorization = `Bearer ${token}`
     const method = (options.method ?? 'GET').toUpperCase()
     if (!['GET', 'HEAD', 'OPTIONS'].includes(method) && csrfToken) {
       headers['X-CSRF-Token'] = csrfToken
@@ -63,7 +52,6 @@ export const api = {
     if (!res.ok) {
       if (
         res.status === 401 &&
-        api.getToken() !== null &&
         !endpoint.startsWith('/api/auth/login') &&
         !endpoint.startsWith('/api/auth/register') &&
         !endpoint.startsWith('/api/chat') &&
@@ -81,20 +69,17 @@ export const api = {
   // Auth
   async login(credentials: { email: string; password: string; role?: Role }): Promise<{
     user: SafeUser
-    token: string
     csrfToken: string
   }> {
     const res = await api.request<{
       user: SafeUser
-      compatibilityToken: string
       csrfToken: string
     }>('/api/auth/login', {
       method: 'POST',
       body: JSON.stringify(credentials),
     })
-    api.setToken(res.compatibilityToken)
     api.setCsrfToken(res.csrfToken)
-    return { user: res.user, token: res.compatibilityToken, csrfToken: res.csrfToken }
+    return { user: res.user, csrfToken: res.csrfToken }
   },
 
   async register(formData: Record<string, any>): Promise<{
@@ -115,9 +100,7 @@ export const api = {
     const res = await api.request<{
       user: SafeUser
       csrfToken: string
-      compatibilityToken: string
     }>('/api/auth/me')
-    api.setToken(res.compatibilityToken)
     api.setCsrfToken(res.csrfToken)
     return res.user
   },
@@ -126,12 +109,10 @@ export const api = {
     const res = await api.request<{
       user: SafeUser
       csrfToken: string
-      compatibilityToken: string
     }>('/api/auth/me', {
       method: 'PUT',
       body: JSON.stringify(updates),
     })
-    api.setToken(res.compatibilityToken)
     api.setCsrfToken(res.csrfToken)
     return res.user
   },
@@ -140,7 +121,6 @@ export const api = {
     try {
       await api.request('/api/auth/logout', { method: 'POST' })
     } finally {
-      api.setToken(null)
       api.setCsrfToken(null)
     }
   },
@@ -176,7 +156,6 @@ export const api = {
     urgency?: string
     title?: string
     phone?: string
-    seekerName?: string
   }): Promise<HelpRequest> {
     const res = await api.request<{ request: HelpRequest }>('/api/requests', {
       method: 'POST',
@@ -192,7 +171,6 @@ export const api = {
       assignedNgoId?: string
       assignedNgoName?: string
       assignedVolunteerId?: string
-      assignedVolunteerName?: string
       note?: string
       completionReport?: string
       visitDate?: string

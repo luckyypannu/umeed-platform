@@ -31,7 +31,7 @@ import {
   getRelativeTime,
   maskContactDetail,
 } from '../../lib/dashboard-helpers'
-import { categories } from '../CategoryGrid'
+import { categories } from '../../lib/categories'
 
 export default function SeekerDashboard({
   user,
@@ -461,12 +461,12 @@ export default function SeekerDashboard({
             <h3 className="text-base font-bold text-slate-900 mb-1">Need a specific category of help?</h3>
             <p className="text-xs text-slate-500 mb-4">Click any category to begin a personalized request</p>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-              {categories.slice(0, 6).map((catName) => (
+              {categories.map((category) => (
                 <button
-                  key={catName}
+                  key={category.id}
                   type="button"
                   onClick={() => {
-                    setNewCategory(catName)
+                    setNewCategory(category.label)
                     setActiveSubTab('new-request')
                   }}
                   className="p-3 text-left border border-slate-200 rounded-xl hover:border-emerald-600 hover:bg-emerald-50/40 transition flex items-center gap-2.5 group"
@@ -475,7 +475,7 @@ export default function SeekerDashboard({
                     <HeartHandshake className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="text-xs font-bold text-slate-900 block">{catName}</span>
+                    <span className="text-xs font-bold text-slate-900 block">{category.label}</span>
                     <span className="text-[10px] text-slate-500">Click to request</span>
                   </div>
                 </button>
@@ -516,19 +516,19 @@ export default function SeekerDashboard({
                 Support Category <span className="text-red-500">*</span>
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {categories.map((catName) => (
+                {categories.map((category) => (
                   <button
-                    key={catName}
+                    key={category.id}
                     type="button"
-                    onClick={() => setNewCategory(catName)}
+                    onClick={() => setNewCategory(category.label)}
                     className={`p-2.5 text-xs text-left rounded-xl border flex items-center gap-2 transition ${
-                      newCategory === catName
+                      newCategory === category.label
                         ? 'border-emerald-600 bg-emerald-50 font-bold text-emerald-950 shadow-xs'
                         : 'border-slate-200 hover:border-slate-300 text-slate-700'
                     }`}
                   >
                     <HeartHandshake className="w-4 h-4 text-emerald-700 flex-shrink-0" />
-                    <span className="truncate">{catName}</span>
+                    <span className="truncate">{category.label}</span>
                   </button>
                 ))}
               </div>

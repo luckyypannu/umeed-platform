@@ -19,10 +19,6 @@ const environmentSchema = z.object({
     (secret) => Buffer.byteLength(secret, 'utf8') >= 32,
     'must contain at least 32 bytes',
   ),
-  JWT_SECRET: z.string().refine(
-    (secret) => Buffer.byteLength(secret, 'utf8') >= 32,
-    'must contain at least 32 bytes',
-  ),
   FRONTEND_ORIGIN: z.string().url().refine((origin) => {
     const url = new URL(origin)
     return ['http:', 'https:'].includes(url.protocol) && url.origin === origin
