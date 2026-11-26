@@ -28,7 +28,6 @@ const requestBodySchema = z.object({
   urgency: z.enum(requestUrgencies).optional(),
   title: z.string().trim().min(1).max(160).optional(),
   phone: z.string().trim().max(32).optional(),
-  seekerName: z.string().trim().max(120).optional(),
 }).strict()
 
 const updateBodySchema = z.object({
@@ -42,7 +41,6 @@ const updateBodySchema = z.object({
   assignedNgoId: z.string().regex(/^[a-f\d]{24}$/i).optional(),
   assignedNgoName: z.string().max(160).optional(),
   assignedVolunteerId: z.string().regex(/^[a-f\d]{24}$/i).optional(),
-  assignedVolunteerName: z.string().max(160).optional(),
   note: z.string().trim().min(1).max(500).optional(),
   completionReport: z.string().trim().min(1).max(2000).optional(),
   visitDate: z.string().trim().max(50).optional(),

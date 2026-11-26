@@ -1,12 +1,11 @@
-'use client'
+import type { Metadata } from 'next'
+import ImpactClient from './impact-client'
 
-import { useRouter } from 'next/navigation'
-import { InfoPage } from '../../components/PublicShell'
-import { routePath } from '../../lib/routes'
+export const metadata: Metadata = {
+  title: 'Community Impact',
+  description: 'See UMEED community support activity and coverage statistics.',
+}
 
 export default function ImpactPage() {
-  const router = useRouter()
-  return (
-    <InfoPage navigate={(route) => router.push(routePath(route))} page="impact" />
-  )
+  return <ImpactClient />
 }

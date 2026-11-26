@@ -28,6 +28,7 @@ import {
   getRelativeTime,
   maskContactDetail,
 } from '../../lib/dashboard-helpers'
+import { categories } from '../../lib/categories'
 
 export default function VolunteerDashboard({
   user,
@@ -814,7 +815,7 @@ export default function VolunteerDashboard({
                 type="text"
                 value={profileAreas}
                 onChange={(e) => setProfileAreas(e.target.value)}
-                placeholder="e.g. Food Support, Healthcare, Education, Emergency"
+                placeholder={categories.slice(0, 3).map((category) => category.label).join(', ')}
                 className="w-full text-xs sm:text-sm px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-600 focus:outline-none"
               />
               <span className="text-[11px] text-slate-400">Separate multiple categories with commas</span>

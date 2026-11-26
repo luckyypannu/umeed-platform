@@ -1,12 +1,11 @@
-'use client'
+import type { Metadata } from 'next'
+import NgosClient from './ngos-client'
 
-import { useRouter } from 'next/navigation'
-import { InfoPage } from '../../components/PublicShell'
-import { routePath } from '../../lib/routes'
+export const metadata: Metadata = {
+  title: 'NGO Partners',
+  description: 'Explore UMEED partner organizations and learn how NGOs can join the community.',
+}
 
 export default function NgosPage() {
-  const router = useRouter()
-  return (
-    <InfoPage navigate={(route) => router.push(routePath(route))} page="ngos" />
-  )
+  return <NgosClient />
 }

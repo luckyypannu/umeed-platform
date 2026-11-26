@@ -1,17 +1,11 @@
-'use client'
+import type { Metadata } from 'next'
+import EmergencyClient from './emergency-client'
 
-import { useRouter } from 'next/navigation'
-import PublicShell from '../../components/PublicShell'
-import EmergencyAssistance from '../../components/EmergencyAssistance'
-import { routePath } from '../../lib/routes'
+export const metadata: Metadata = {
+  title: 'Emergency Assistance',
+  description: 'Read UMEED emergency guidance and manage private location-based alerts. UMEED does not dispatch emergency services.',
+}
 
 export default function EmergencyPage() {
-  const router = useRouter()
-  return (
-    <PublicShell navigate={(route) => router.push(routePath(route))}>
-      <main className="info-page">
-        <EmergencyAssistance />
-      </main>
-    </PublicShell>
-  )
+  return <EmergencyClient />
 }

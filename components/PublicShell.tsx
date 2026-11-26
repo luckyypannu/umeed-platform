@@ -7,15 +7,16 @@ import LanguageSelector from './LanguageSelector'
 import ChatWidget from './ChatWidget'
 import RoleSelectionCard from './RoleSelectionCard'
 import { routePath } from '../lib/routes'
+import { categories, type SupportCategoryId } from '../lib/categories'
 import LogoComponent, { LOGO_URL } from './Logo'
 import PageTitleComponent from './PageTitle'
-import CategoryGridComponent, { categories, categoryKeys } from './CategoryGrid'
+import CategoryGridComponent from './CategoryGrid'
 import ButtonComponent from './ui/button'
 import { api } from '../lib/api'
 import { ImpactStats, NgoDirectoryEntry } from '../lib/types'
 
 // ── Re-exports so existing imports from PublicShell continue to work ──────────
-export { LOGO_URL, categories, categoryKeys }
+export { LOGO_URL, categories }
 export function Logo() {
   return <LogoComponent />
 }
@@ -146,38 +147,40 @@ export function HomePage({
       .finally(() => setStatsLoading(false))
   }, [])
 
-  const categoryFeatures = [
-    {
-      title: 'Food & Rations',
+  const categoryFeatureDetails: Record<SupportCategoryId, { desc: string; icon: string }> = {
+    'food-support': {
       desc: 'Nutritional kits, staple grain provisions, and emergency meals for families facing hardship.',
       icon: '🍲',
     },
-    {
-      title: 'Healthcare & Medicine',
+    healthcare: {
       desc: 'Essential prescriptions, medical transport coordination, and elderly medical supplies.',
       icon: '💊',
     },
-    {
-      title: 'Education & Learning',
+    education: {
       desc: 'Books, school supplies, learning devices, and one-on-one student mentorship.',
       icon: '📚',
     },
-    {
-      title: 'Elderly & Special Care',
+    'elderly-support': {
       desc: 'Home visits, physical mobility aid, essential supplies, and dignified companion care.',
       icon: '🤝',
     },
-    {
-      title: 'Essential Resources',
+    'digital-assistance': {
+      desc: 'Digital literacy, device access, and guidance using essential online services.',
+      icon: '💻',
+    },
+    mentoring: {
+      desc: 'One-on-one guidance, learning support, and encouragement for personal growth.',
+      icon: '🧭',
+    },
+    'essential-resources': {
       desc: 'Clothing, blankets, hygiene kits, temporary shelter relief, and daily essentials.',
       icon: '📦',
     },
-    {
-      title: 'Emergency Assistance',
-      desc: 'Urgent location-based crisis response, disaster relief, and rapid volunteer dispatch.',
-      icon: '🚨',
-    },
-  ]
+  }
+  const categoryFeatures = categories.map((category) => ({
+    ...category,
+    ...categoryFeatureDetails[category.id],
+  }))
 
   const howItWorksSteps = [
     {
@@ -372,11 +375,11 @@ export function HomePage({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {categoryFeatures.map((cat, idx) => (
+            {categoryFeatures.map((cat) => (
               <div
-                key={idx}
+                key={cat.id}
                 onClick={() => {
-                  onSelect(cat.title)
+                  onSelect(cat.label)
                   navigate('request-support')
                 }}
                 className="group cursor-pointer p-6 bg-white rounded-3xl border border-slate-200 hover:border-emerald-600 hover:shadow-md transition space-y-3 flex flex-col justify-between"
@@ -384,7 +387,7 @@ export function HomePage({
                 <div className="space-y-3">
                   <span className="text-3xl block group-hover:scale-110 transition origin-left">{cat.icon}</span>
                   <h3 className="text-lg font-bold text-slate-900 group-hover:text-emerald-800 transition">
-                    {cat.title}
+                    {t(cat.i18nKey)}
                   </h3>
                   <p className="text-xs text-slate-600 leading-relaxed">{cat.desc}</p>
                 </div>
@@ -393,6 +396,23 @@ export function HomePage({
                 </div>
               </div>
             ))}
+            <div
+              onClick={() => navigate('emergency')}
+              className="group cursor-pointer p-6 bg-white rounded-3xl border border-slate-200 hover:border-emerald-600 hover:shadow-md transition space-y-3 flex flex-col justify-between"
+            >
+              <div className="space-y-3">
+                <span className="text-3xl block group-hover:scale-110 transition origin-left">🚨</span>
+                <h3 className="text-lg font-bold text-slate-900 group-hover:text-emerald-800 transition">
+                  {t('nav.emergency')}
+                </h3>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Urgent location-based crisis guidance. UMEED does not dispatch emergency services.
+                </p>
+              </div>
+              <div className="pt-2 text-xs font-bold text-emerald-700 flex items-center gap-1 group-hover:translate-x-1 transition">
+                Open Emergency Assistance <ArrowRight className="w-3.5 h-3.5" />
+              </div>
+            </div>
           </div>
         </section>
 
@@ -887,13 +907,13 @@ export function InfoPage({
               <p>{t('impact.categories.intro')}</p>
               <div className="category-grid" style={{ marginTop: '20px' }}>
                 {categories.map((category) => (
-                  <div className="category-card" key={category}>
+                  <div className="category-card" key={category.id}>
                     <HeartHandshake />
                     <span>
-                      <strong>{t(categoryKeys[category])}</strong>
+                      <strong>{t(category.i18nKey)}</strong>
                       <small>
-                        {impactStats?.categoryBreakdown[category]
-                          ? `${impactStats.categoryBreakdown[category]} Active Requests`
+                        {impactStats?.categoryBreakdown[category.label]
+                          ? `${impactStats.categoryBreakdown[category.label]} Active Requests`
                           : t('publicShell.categorySupport')}
                       </small>
                     </span>

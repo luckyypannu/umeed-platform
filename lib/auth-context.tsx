@@ -7,7 +7,6 @@ import { Role, SafeUser } from './types'
 interface AuthContextType {
   user: SafeUser | null
   role: Role
-  token: string | null
   isLoading: boolean
   login: (credentials: { email: string; password: string; role?: Role }) => Promise<SafeUser>
   register: (formData: Record<string, any>) => Promise<{ user: SafeUser; message: string }>
@@ -20,7 +19,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<SafeUser | null>(null)
-  const [token, setToken] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const authEpoch = useRef(0)
 
@@ -29,9 +27,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const handleSessionExpired = () => {
       authEpoch.current += 1
-      api.setToken(null)
       api.setCsrfToken(null)
-      setToken(null)
       setUser(null)
     }
     window.addEventListener('umeed-session-expired', handleSessionExpired)
@@ -42,13 +38,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .then((fetchedUser) => {
         if (authEpoch.current !== initialEpoch) return
         setUser(fetchedUser)
-        setToken(api.getToken())
       })
       .catch(() => {
         if (authEpoch.current !== initialEpoch) return
-        api.setToken(null)
         api.setCsrfToken(null)
-        setToken(null)
         setUser(null)
       })
       .finally(() => {
@@ -64,7 +57,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const res = await api.login(credentials)
       if (authEpoch.current === epoch) {
         setUser(res.user)
-        setToken(res.token)
       }
       return res.user
     } finally {
@@ -88,7 +80,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await api.logout()
     } finally {
       setUser(null)
-      setToken(null)
     }
   }
 
@@ -98,13 +89,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const refreshed = await api.getMe()
       if (authEpoch.current !== epoch) return null
       setUser(refreshed)
-      setToken(api.getToken())
       return refreshed
     } catch {
       if (authEpoch.current !== epoch) return null
-      api.setToken(null)
       api.setCsrfToken(null)
-      setToken(null)
       setUser(null)
       return null
     }
@@ -115,7 +103,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       value={{
         user,
         role,
-        token,
         isLoading,
         login,
         register,

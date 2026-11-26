@@ -19,7 +19,6 @@ import { User } from '../src/models/user.js'
 
 const frontendOrigin = 'http://localhost:3000'
 const sessionSecret = 'isolated-test-session-secret-with-over-32-bytes'
-const jwtSecret = 'isolated-test-jwt-secret-with-over-32-bytes'
 let mongo: MongoMemoryServer
 let app: ReturnType<typeof createApp>
 let seekerId = ''
@@ -31,7 +30,6 @@ before(async () => {
     MONGODB_URI: mongo.getUri(),
     MONGODB_DB_NAME: 'umeed_auth_test',
     SESSION_SECRET: sessionSecret,
-    JWT_SECRET: jwtSecret,
     FRONTEND_ORIGIN: frontendOrigin,
     TRUST_PROXY: 1,
     LOG_LEVEL: 'silent',
@@ -162,7 +160,6 @@ test('login creates an HttpOnly database session; invalid role and bearer-only a
   assert.equal(login.status, 200)
   assert.equal(login.body.user.id, seekerId)
   assert.equal(typeof login.body.csrfToken, 'string')
-  assert.equal(typeof login.body.compatibilityToken, 'string')
 
   const setCookie = (login.headers['set-cookie'] as string[])[0]
   assert.match(setCookie, /HttpOnly/i)
@@ -185,7 +182,7 @@ test('login creates an HttpOnly database session; invalid role and bearer-only a
 
   const noCookie = await request(app)
     .get('/api/v1/auth/me')
-    .set('Authorization', `Bearer ${login.body.compatibilityToken}`)
+    .set('Authorization', 'Bearer unused-token')
   assert.equal(noCookie.status, 401)
 
   const csrfToken = login.body.csrfToken as string
@@ -398,5 +395,5 @@ test('CSRF token is bound to the session and its server secret', () => {
   assert.equal(csrf.length, 43)
   assert.equal(verifyCsrfToken(csrf, token, sessionSecret), true)
   assert.equal(verifyCsrfToken(csrf, `C${token.slice(1)}`, sessionSecret), false)
-  assert.equal(verifyCsrfToken(csrf, token, jwtSecret), false)
+  assert.equal(verifyCsrfToken(csrf, token, `${sessionSecret}-different`), false)
 })

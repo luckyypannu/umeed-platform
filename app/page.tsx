@@ -1,19 +1,11 @@
-'use client'
+import type { Metadata } from 'next'
+import HomeClient from './home-client'
 
-import { useRouter } from 'next/navigation'
-import { HomePage } from '../components/PublicShell'
-import { routePath } from '../lib/routes'
+export const metadata: Metadata = {
+  title: 'Home',
+  description: 'Find community support, connect with verified organizations, and volunteer with UMEED.',
+}
 
 export default function Page() {
-  const router = useRouter()
-  return (
-    <HomePage
-      navigate={(route) => router.push(routePath(route))}
-      onSelect={(category) =>
-        router.push(
-          `/dashboard?tab=request-support&category=${encodeURIComponent(category)}`,
-        )
-      }
-    />
-  )
+  return <HomeClient />
 }

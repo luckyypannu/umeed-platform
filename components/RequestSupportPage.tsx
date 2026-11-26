@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { ArrowRight, Check, Loader2 } from 'lucide-react'
 import { useTranslation } from '../lib/useTranslation'
-import { categories } from './CategoryGrid'
+import { categories } from '../lib/categories'
 import PageTitle from './PageTitle'
 import { api } from '../lib/api'
 import { HelpRequest } from '../lib/types'
@@ -112,7 +112,7 @@ export default function RequestSupportPage({
             >
               <option value="">{t('request.selectCategory')}</option>
               {categories.map((item) => (
-                <option key={item} value={item}>{item}</option>
+                <option key={item.id} value={item.label}>{t(item.i18nKey)}</option>
               ))}
             </select>
           </label>

@@ -2,24 +2,7 @@
 
 import { ArrowRight, HeartHandshake } from 'lucide-react'
 import { useTranslation } from '../lib/useTranslation'
-
-export const categories = [
-  'Education',
-  'Food Support',
-  'Elderly Support',
-  'Digital Assistance',
-  'Mentoring',
-  'Essential Resources',
-]
-
-export const categoryKeys: Record<string, string> = {
-  Education: 'publicShell.categoryEducation',
-  'Food Support': 'publicShell.categoryFood',
-  'Elderly Support': 'publicShell.categoryElderly',
-  'Digital Assistance': 'publicShell.categoryDigital',
-  Mentoring: 'publicShell.categoryMentoring',
-  'Essential Resources': 'publicShell.categoryResources',
-}
+import { categories } from '../lib/categories'
 
 export default function CategoryGrid({
   navigate,
@@ -34,15 +17,15 @@ export default function CategoryGrid({
       {categories.map((category) => (
         <button
           className="category-card"
-          key={category}
+          key={category.id}
           onClick={() => {
-            onSelect(category)
+            onSelect(category.label)
             navigate('request-support')
           }}
         >
           <HeartHandshake />
           <span>
-            <strong>{t(categoryKeys[category])}</strong>
+            <strong>{t(category.i18nKey)}</strong>
             <small>{t('publicShell.categorySupport')}</small>
           </span>
           <ArrowRight />

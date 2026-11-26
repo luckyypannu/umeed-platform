@@ -4,7 +4,7 @@ UMEED connects people seeking support with NGOs and volunteers. The existing Nex
 
 ## Current migration boundary
 
-The Express backend provides MongoDB-backed authentication, support-request APIs, verification queues, emergency records, anonymous chat, volunteer opportunities and directory, NGO directory, notifications, audit history, and aggregate impact statistics. Same-origin Next.js route handlers proxy all frontend API paths to Express; no Next.js API handler reads the legacy JSON-backed store. The visual design remains in place. `data/db.json` has not been read, copied, or migrated by the new  backend.nkjnc 
+The Express backend provides MongoDB-backed authentication, support-request APIs, verification queues, emergency records, anonymous chat, volunteer opportunities and directory, NGO directory, notifications, audit history, and aggregate impact statistics. Same-origin Next.js route handlers proxy all frontend API paths to Express; no Next.js API handler reads the legacy JSON-backed store. The visual design remains in place. `data/db.json` has not been read, copied, or migrated by the new backend.
 
 ## Local setup
 
@@ -15,7 +15,7 @@ npm ci
 npm --prefix server ci
 ```
 
-Create `.env.local` from `.env.example`. Set distinct, randomly generated values of at least 32 bytes for `JWT_SECRET` and `SESSION_SECRET`; both are mandatory. Configure a dedicated MongoDB database and set `API_INTERNAL_URL` to the Express API URL. Never commit `.env.local`, database contents, or backups.
+Create `.env.local` from `.env.example`. Set a randomly generated `SESSION_SECRET` of at least 32 bytes. Configure a dedicated MongoDB database and set `API_INTERNAL_URL` to the Express API URL. Never commit `.env.local`, database contents, or backups.
 
 Start a reachable MongoDB instance, then start the backend and frontend in separate terminals:
 
@@ -25,6 +25,8 @@ npm run dev
 ```
 
 The frontend is served at `http://localhost:3000`; Express defaults to port `4000`. The Next.js `/api/auth/*` routes proxy to Express and return an explicit service error when `API_INTERNAL_URL` is unset or unavailable; they do not fall back to JSON-file authentication.
+
+`PROXY_SHARED_SECRET` is not currently read by either the Next.js proxy or Express, so setting it has no effect and does not authenticate proxy requests. Do not rely on it as a security control. Keep `API_INTERNAL_URL` private and restrict backend network ingress to the frontend service until shared-secret proxy authentication is implemented.
 
 The backend requires MongoDB at startup. Request mutations, verification decisions, and emergency record modifications write their audit events transactionally, so the MongoDB deployment must support transactions (a replica set or sharded cluster). `/api/v1/health/live` reports process liveness and `/api/v1/health/ready` reports database readiness.
 
@@ -49,10 +51,9 @@ This local harness is **not** a production-like managed staging service: it is u
 - Verified NGOs can publish validated volunteer opportunities; the creator reference is stored privately and is not included in public opportunity responses.
 - Verified NGO owners can view and accept applications only for opportunities they created. Applicant contact details are not returned; acceptance writes a volunteer notification and an audit event.
 - Admin users can only be created through the interactive operator command `npm --prefix server run admin:provision`. It refuses to overwrite an account and does not accept a role from a request.
-- To add an Admin to the persistent local staging database, start the staging services as described above, then run `npm --prefix server run admin:provision` in a second PowerShell terminal. The ignored `.env.local` must point to `mongodb://127.0.0.1:27117/?replicaSet=umeedPhase71Stage` and database `umeed_phase71_staging`; use separate random values of at least 32 bytes for `JWT_SECRET` and `SESSION_SECRET`. The command prompts for name and email, then prompts twice for a hidden password (12–128 characters). It creates an additional Admin and refuses duplicate email addresses; it does not replace existing accounts. Production-mode provisioning is disabled.
+- To add an Admin to the persistent local staging database, start the staging services as described above, then run `npm --prefix server run admin:provision` in a second PowerShell terminal. The ignored `.env.local` must point to `mongodb://127.0.0.1:27117/?replicaSet=umeedPhase71Stage` and database `umeed_phase71_staging`; set a random `SESSION_SECRET` of at least 32 bytes. The command prompts for name and email, then prompts twice for a hidden password (12–128 characters). It creates an additional Admin and refuses duplicate email addresses; it does not replace existing accounts. Production-mode provisioning is disabled.
 - Authentication uses a random HttpOnly, SameSite session cookie backed by MongoDB. Session records store only a keyed hash of the cookie token, expire after eight hours, and are checked for revocation and expiry on every authenticated request.
 - State-changing authentication operations require the configured frontend `Origin` and a session-bound CSRF token.
-- `JWT_SECRET` signs short-lived compatibility tokens held in browser memory only, so the existing Next.js resource API calls can continue during migration. The Express session cookie remains the authority for Express authentication.
 - No seeded user from `data/db.json` has been migrated. Existing seeded logins will not work against MongoDB until a separately approved data migration.
 - The dashboard uses the role from the authenticated MongoDB session, not the URL. Expired sessions clear frontend auth state; pending NGO/volunteer accounts cannot self-approve.
 - Admins can review pending NGO and volunteer applications. Public directories include verified profiles only and omit private contact fields.
@@ -115,7 +116,7 @@ Legacy emergency records are excluded because they lack verified owner-bound con
 The application has not been deployed or cut over. Use a separate staging MongoDB database and fictional data first; do not point staging or local development at production.
 
 1. Provision a MongoDB replica set or sharded cluster with TLS, least-privilege application credentials, backups, and a database name reserved for this environment. Transactions are required.
-2. Set the Express environment (`NODE_ENV=production`, `MONGODB_URI`, `MONGODB_DB_NAME`, `SESSION_SECRET`, `JWT_SECRET`, `FRONTEND_ORIGIN`, `PORT`, `TRUST_PROXY`, `LOG_LEVEL`, and `API_RATE_LIMIT_MAX`) in the deployment secret manager. Generate distinct random secrets of at least 32 bytes; never put real credentials in Git, build logs, or issue reports.
+2. Set the Express environment (`NODE_ENV=production`, `MONGODB_URI`, `MONGODB_DB_NAME`, `SESSION_SECRET`, `FRONTEND_ORIGIN`, `PORT`, `TRUST_PROXY`, `LOG_LEVEL`, and `API_RATE_LIMIT_MAX`) in the deployment secret manager. Generate a random `SESSION_SECRET` of at least 32 bytes; never put real credentials in Git, build logs, or issue reports.
 3. Set the Next.js server environment `API_INTERNAL_URL` to the private HTTPS Express origin. Do not expose the database URI or backend credentials to `NEXT_PUBLIC_*` variables. In production, the frontend origin and backend URL must use HTTPS.
 4. Restrict backend network ingress to the frontend service and trusted health-check sources. Configure `FRONTEND_ORIGIN` to the exact browser origin and set `TRUST_PROXY` only to the actual trusted reverse-proxy hop count. The Express API applies Helmet, exact-origin credentialed CORS, CSRF checks on mutations, login/registration throttles, and a configurable API rate limit.
 5. Run `npm ci` and `npm --prefix server ci`, then `npm run backend:build`, `npm run build`, `npx tsc --noEmit`, and both test suites. Run all dependency audits and resolve new advisories before release.
@@ -170,7 +171,7 @@ Backend integration tests use `mongodb-memory-server`, an isolated temporary Mon
 - `lib/server/api-proxy.ts` forwards the existing feature URLs to Express without forwarding browser authorization headers and allowlists capability cookies by route.
 - `server/src/database/` manages MongoDB connection and readiness.
 - `lib/server/auth-api-proxy.ts` forwards the frontend's existing same-origin auth paths to Express.
-- `lib/auth-context.tsx` keeps compatibility tokens in memory rather than `localStorage`; the visual frontend remains based on the existing pages and components.
+- `lib/auth-context.tsx` keeps the authenticated user and CSRF token in React state; authentication uses the HttpOnly session cookie.
 - `data/db.json` remains preserved for a separately approved data migration; all Next.js API handlers proxy to Express and no handler reads the JSON store.
 
 ## Remaining migration and security work

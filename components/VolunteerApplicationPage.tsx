@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react'
 import { Check, Loader2 } from 'lucide-react'
 import { useTranslation } from '../lib/useTranslation'
+import { categories } from '../lib/categories'
 import FormMessage from './ui/FormMessage'
-import { categories, categoryKeys } from './CategoryGrid'
 import { api } from '../lib/api'
 import { useAuth } from '../lib/auth-context'
 
@@ -132,21 +132,21 @@ export default function VolunteerApplicationPage() {
       </label>
       <label htmlFor="vol-interests">
         {t('form.interests')}
-        <input id="vol-interests" required name="interests" placeholder="e.g. Education, Elderly Support" defaultValue={user.interests} />
+        <input id="vol-interests" required name="interests" placeholder="e.g. Community learning, elder companionship" defaultValue={user.interests} />
       </label>
 
       <fieldset>
         <legend>{t('form.categories')}</legend>
         <div className="check-grid">
           {categories.map((category) => (
-            <label htmlFor={`vol-category-${category}`} key={category}>
+            <label htmlFor={`vol-category-${category.id}`} key={category.id}>
               <input
-                id={`vol-category-${category}`}
+                id={`vol-category-${category.id}`}
                 type="checkbox"
-                checked={selected.includes(category)}
-                onChange={() => toggle(category)}
+                checked={selected.includes(category.label)}
+                onChange={() => toggle(category.label)}
               />
-              {t(categoryKeys[category])}
+              {t(category.i18nKey)}
             </label>
           ))}
         </div>
