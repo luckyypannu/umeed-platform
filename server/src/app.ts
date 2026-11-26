@@ -16,6 +16,7 @@ import { createImpactRouter } from './impact/routes.js'
 import { createAnalyticsRouter } from './analytics/routes.js'
 
 
+
 export function createApp(config: ServerConfig) {
   const app = express()
   const logger = pino({ level: config.LOG_LEVEL })
@@ -92,6 +93,7 @@ export function createApp(config: ServerConfig) {
   app.use('/api/v1', (req, res) => {
     res.status(404).json({ error: 'Not found', requestId: req.id })
   })
+  // error handling
 
   const errorHandler: ErrorRequestHandler = (error: unknown, req, res, _next) => {
     const statusCode =
