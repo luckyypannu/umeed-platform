@@ -15,6 +15,7 @@ import {
 } from './crypto.js'
 import {
   clearSessionCookie,
+  createLoginIpRateLimiter,
   createLoginRateLimiter,
   createRegistrationRateLimiter,
   requireCsrf,
@@ -227,6 +228,7 @@ export function createAuthRouter(config: ServerConfig) {
 
   router.post(
     '/login',
+    createLoginIpRateLimiter(),
     createLoginRateLimiter(config),
     requireOrigin,
     async (request, response) => {
@@ -308,6 +310,23 @@ export function createAuthRouter(config: ServerConfig) {
     const user = await User.findById(request.auth!.user.id)
     if (!user) {
       response.status(401).json({ error: 'Unauthorized', requestId: request.id })
+      return
+    }
+
+    if (
+      user.status === 'verified' &&
+      user.role === 'ngo' &&
+      (
+        parsed.data.orgName !== undefined ||
+        parsed.data.contactPerson !== undefined ||
+        parsed.data.address !== undefined ||
+        parsed.data.operatingCity !== undefined
+      )
+    ) {
+      response.status(403).json({
+        error: 'Contact an admin to change verified organization details',
+        requestId: request.id,
+      })
       return
     }
 

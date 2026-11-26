@@ -317,6 +317,11 @@ test('volunteer may view only assigned requests and submit completion workflow u
   assert.equal((await volunteer.get(`/api/v1/requests/${requestIds.own}`)).status, 404)
   assert.equal((await agentFor('volunteerB').get(`/api/v1/requests/${requestIds.assignedVolunteer}`)).status, 404)
 
+  const fractionalRating = await stateChange(agentFor('seekerB'), 'seekerB')
+    .patch(`/api/v1/requests/${requestIds.assignedVolunteer}`)
+    .send({ rating: 4.5 })
+  assert.equal(fractionalRating.status, 400)
+
   const volunteerComplete = await stateChange(volunteer, 'volunteerA')
     .patch(`/api/v1/requests/${requestIds.assignedVolunteer}`)
     .send({ status: 'awaiting_beneficiary_verification', completionReport: 'Delivered groceries and checked in with the beneficiary.' })
