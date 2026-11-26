@@ -4,7 +4,7 @@ UMEED connects people seeking support with NGOs and volunteers. The existing Nex
 
 ## Current migration boundary
 
-The Express backend provides MongoDB-backed authentication, support-request APIs, verification queues, emergency records, anonymous chat, volunteer opportunities and directory, NGO directory, notifications, audit history, and aggregate impact statistics. Same-origin Next.js route handlers proxy all frontend API paths to Express; no Next.js API handler reads the legacy JSON-backed store. The visual design remains in place. `data/db.json` has not been read, copied, or migrated by the new backend.
+The Express backend provides MongoDB-backed authentication, support-request APIs, verification queues, emergency records, anonymous chat, volunteer opportunities and directory, NGO directory, notifications, audit history, and aggregate impact statistics. Same-origin Next.js route handlers proxy all frontend API paths to Express; no Next.js API handler reads the legacy JSON-backed store. The visual design remains in place. `data/db.json` has not been read, copied, or migrated by the new  backend.nkjnc 
 
 ## Local setup
 
