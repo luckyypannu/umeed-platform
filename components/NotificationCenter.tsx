@@ -26,6 +26,7 @@ export default function NotificationCenter({
   const [filter, setFilter] = useState<'all' | 'unread'>('all')
   const [markingId, setMarkingId] = useState<string | null>(null)
   const [markingAll, setMarkingAll] = useState(false)
+  const [actionError, setActionError] = useState('')
 
   const deduped = dedupeNotifications(notifications)
   const unreadCount = deduped.filter((n) => !n.read).length
@@ -33,8 +34,14 @@ export default function NotificationCenter({
 
   const handleMarkOne = async (id: string) => {
     setMarkingId(id)
+    setActionError('')
+
     try {
       await onMarkRead(id)
+    } catch {
+      setActionError(
+        'Could not mark this notification as read. Please try again.'
+      )
     } finally {
       setMarkingId(null)
     }
@@ -42,11 +49,18 @@ export default function NotificationCenter({
 
   const handleMarkAll = async () => {
     setMarkingAll(true)
+    setActionError('')
+
     try {
       const unread = deduped.filter((n) => !n.read)
+
       for (const item of unread) {
         await onMarkRead(item.id)
       }
+    } catch {
+      setActionError(
+        'Some notifications could not be marked as read. Please try again.'
+      )
     } finally {
       setMarkingAll(false)
     }
@@ -133,7 +147,24 @@ export default function NotificationCenter({
           )}
         </div>
       </div>
+{actionError && (
+  <div role="alert" className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4">
+    <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0" />
+     <div className="flex-1">
+      <p className="text-sm font-medium text-red-800"> {actionError}</p>
+       <p className="text-xs text-red-600 mt-1">
+        You can try the action again.</p>
+  </div>
 
+    <button
+      type="button"
+      onClick={() => setActionError('')}
+      className="text-xs font-medium text-red-700 hover:text-red-900"
+    >
+      Dismiss
+    </button>
+  </div>
+)}
       {/* Notifications list */}
       {displayed.length === 0 ? (
         <div className="p-12 text-center bg-white rounded-xl border border-dashed border-slate-300">
