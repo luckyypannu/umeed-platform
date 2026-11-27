@@ -7,6 +7,7 @@ import type { Role } from '../lib/types'
 import LanguageSelector from './LanguageSelector'
 import Logo from './Logo'
 import { useAuth } from '../lib/auth-context'
+import ThemeToggle from './ThemeToggle'
 
 export default function DashboardShell({
   children,
@@ -40,14 +41,17 @@ export default function DashboardShell({
       {/* Mobile Top Header */}
       <div className="md:hidden flex items-center justify-between p-4 bg-[#0b3c28] text-white sticky top-0 z-30">
         <Logo />
-        <button
-          type="button"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="p-2 text-white hover:bg-emerald-800 rounded-lg"
-          aria-label="Toggle navigation"
-        >
-          {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="p-2 text-white hover:bg-emerald-800 rounded-lg"
+            aria-label="Toggle navigation"
+          >
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
       </div>
 
       {/* Sidebar */}
@@ -120,6 +124,7 @@ export default function DashboardShell({
         </div>
 
         <div className="pt-6 border-t border-emerald-900 space-y-3">
+          <ThemeToggle className="desktop-theme-toggle" />
           <div className="text-xs text-emerald-200">
             <LanguageSelector value={lang} onChange={setLang} />
           </div>

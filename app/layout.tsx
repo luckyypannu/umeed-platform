@@ -1,7 +1,9 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
+import { headers } from 'next/headers'
 import { Noto_Sans_Devanagari, Noto_Sans_Telugu, Noto_Sans_Gurmukhi } from 'next/font/google'
 import './globals.css'
+import { ThemeProvider } from '../lib/theme-context'
 
 const notoDevanagari = Noto_Sans_Devanagari({
   subsets: ['devanagari'],
@@ -53,25 +55,36 @@ import { AuthProvider } from '../lib/auth-context'
 export const dynamic = 'force-dynamic'
 
 export const viewport: Viewport = {
-  colorScheme: 'light',
+  colorScheme: 'light dark',
   themeColor: '#135b3a',
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const nonce = (await headers()).get('x-nonce') ?? undefined
+
   return (
     <html
       lang="en"
       data-scroll-behavior="smooth"
       className={`${notoDevanagari.variable} ${notoTelugu.variable} ${notoGurmukhi.variable}`}
+      suppressHydrationWarning
     >
+      <head>
+        <script
+          nonce={nonce}
+          dangerouslySetInnerHTML={{
+            __html: `try{var t=localStorage.getItem('umeed-theme');document.documentElement.dataset.theme=t==='dark'?'dark':'light'}catch(e){document.documentElement.dataset.theme='light'}`,
+          }}
+        />
+      </head>
       <body className="antialiased">
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </ThemeProvider>
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>

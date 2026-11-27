@@ -12,6 +12,7 @@ import LogoComponent, { LOGO_URL } from './Logo'
 import PageTitleComponent from './PageTitle'
 import CategoryGridComponent from './CategoryGrid'
 import ButtonComponent from './ui/button'
+import ThemeToggle from './ThemeToggle'
 import { api } from '../lib/api'
 import { ImpactStats, NgoDirectoryEntry } from '../lib/types'
 
@@ -88,7 +89,9 @@ function PublicNav({ navigate }: { navigate: (route: string) => void }) {
           <Link className="emergency-nav" href="/emergency">
             {t('nav.emergency')}
           </Link>
+          <ThemeToggle />
         </nav>
+        <ThemeToggle className="mobile-theme-toggle" />
         <button
           className="menu-btn"
           onClick={() => setOpen(!open)}

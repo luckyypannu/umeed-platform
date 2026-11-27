@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
+@import './theme.css';
 
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .profile-fields,.opportunity-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}.profile-fields label,.opportunity-form label{display:grid;gap:7px;font:700 13px Arial,sans-serif;color:var(--green-dark)}.opportunity-editor{max-width:840px}.opportunity-description,.opportunity-form .success-message{grid-column:1/-1}.success-message{color:var(--green)!important;font-weight:700}.emergency-review-list{display:grid;gap:16px}.emergency-review-card{display:grid;gap:15px}.emergency-review-heading{display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap}.emergency-review-heading>div:last-child{display:grid;text-align:right;color:var(--muted)}.precise-location{padding:10px;background:#fff6e8;border:1px solid #ead4af;border-radius:5px;color:var(--ink)}.emergency-review-card select[multiple]{min-height:110px}.profile-card textarea,.opportunity-form textarea{resize:vertical}@media(max-width:680px){.profile-fields,.opportunity-form{grid-template-columns:1fr}.opportunity-description,.opportunity-form .success-message{grid-column:auto}.emergency-review-heading>div:last-child{text-align:left}.emergency-review-card .btn{width:100%}}
