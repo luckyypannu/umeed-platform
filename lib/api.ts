@@ -72,6 +72,11 @@ export const api = {
       ) {
         window.dispatchEvent(new Event('umeed-session-expired'))
       }
+      if (res.status === 502 || res.status === 503) {
+        throw new Error(
+          'The server is waking up or temporarily unavailable. Please wait a minute and try again.',
+        )
+      }
       throw new Error(data.error || `Request failed with status ${res.status}`)
     }
 
